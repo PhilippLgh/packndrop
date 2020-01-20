@@ -1,0 +1,6 @@
+--require-main ts-node/register
+--require-main source-map-support/register
+--require-main test/electron/main/SetupProtocolHandler.ts
+--full-trace
+--recursive
+test/electron/main/**/*.test.ts

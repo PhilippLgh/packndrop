@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <h1>hello tests</h1>
+  <iframe id="frame"></iframe>
+  <script>
+    const TEXT = '<p>This text will appear in the iframe!</p>'
+
+    const getBlobURL = (code, type) => {
+      const blob = new Blob([code], { type })
+      return URL.createObjectURL(blob)
+    }
+
+    const registerServiceWorker = () => {
+        if ('serviceWorker' in navigator) {
+          console.log('service worker available')
+          // https://github.com/w3c/ServiceWorker/issues/578
+          window.addEventListener('load', function () {
+            console.log('received load')
+            navigator.serviceWorker.register('./sw.js').then(function (registration) {
+              // Registration was successful
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function (err) {
+              // registration failed :(
+              console.log('ServiceWorker registration failed: ', err);
+            })
+          })
+        }
+      }
+
+    function registerPackageProtocol(frame) {
+
+      window.document.addEventListener('myCustomEvent', handleEvent, false)
+      function handleEvent(e) {
+        console.log('iframe:', ...e.detail.args) // outputs: {foo: 'bar'}
+      }
+      const css = ''
+      const html = '<h1>hello frame</h1>'
+      const js = `
+      log = console.log
+      var console = {
+        log: function () {
+          var a = [];
+          // For V8 optimization
+          for (var i = 0, n = arguments.length; i < n; i++) {
+            a.push(arguments[i]);
+          }
+          log(...a)
+          var data = { args: a }
+          var event = new CustomEvent('myCustomEvent', { detail: data })
+          window.parent.document.dispatchEvent(event)
+          // window.top.postMessage('hello', '*', a)
+        }
+      }
+      
+      console.log('registering service worker on iframe...')
+      `
+      const source = `
+        <html>
+          <head><style>${css}</style></head>
+          <body>
+            ${html}
+            <script>${js}<\/script>
+          </body>
+        </html>
+      `
+      frame.srcdoc = source
+    }
+    async function start() {
+
+      /*
+      const appUrl = 'https://github.com/ethereum/remix-ide'
+      const ethpkg = require('ethpkg').default
+      const pkg = await ethpkg.getPackage(appUrl)
+      console.log('pkg', pkg)
+  
+      const index = await pkg.getContent('index.html')
+      */
+
+      const frame = document.getElementById('frame')
+      // frame.srcdoc = index.toString()
+      // frame.src = 'http://www.example.com'
+      // renderString(frame)
+
+      /*
+      const blobUrl = getBlobURL(TEXT, 'text/html')
+      console.log('blob url', blobUrl)
+      frame.src = blobUrl
+      */
+
+      // registerPackageProtocol(frame)
+      registerServiceWorker()
+
+      // GOAL: frame.src = 'ethpkg:///github.com/ethereum/remix-ide'
+    }
+    start()
+    function load() {
+      const script = document.createElement('script')
+      script.src = './myjs.js'
+      document.body.appendChild(script)
+    }
+  </script>
+  <button onclick="load()">load something</button>
+</body>
+
+</html>
