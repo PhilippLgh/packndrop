@@ -16,7 +16,7 @@
     "@types/mocha": "^5.2.7",
     "@types/nock": "^11.1.0",
     "@types/node": "^13.1.6",
-    "axios": "^0.19.1",
+    "axios": "^0.21.1",
     "chai": "^4.2.0",
     "electron": "^7.1.8",
     "electron-mocha": "^8.2.0",
